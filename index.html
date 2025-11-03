@@ -35,93 +35,104 @@ const ctx = canvas.getContext("2d");
 const grid = 20;
 
 let snake = [{x: 160, y: 200}];
-let dx = grid;
-let dy = 0;
+let dx = grid, dy = 0;
 let food = randomFood();
 let score = 0;
 let speed = 150;
 let gameLoop = null;
 
-// ✅ Load Base coin image (correct filename)
+// Base coin ✅
 const coinImg = new Image();
 coinImg.src = "basecoin.png";
 
-// ✅ Best score
+// Save best score
 let best = localStorage.getItem("baseSnakeScore") || 0;
 document.getElementById("best").textContent = best;
 
-// ✅ Mobile swipe controls
+// Touch controls
 let startX = 0, startY = 0;
 document.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
 });
 document.addEventListener("touchmove", e => {
-    let dxT = e.touches[0].clientX - startX;
-    let dyT = e.touches[0].clientY - startY;
-    if (Math.abs(dxT) > Math.abs(dyT)) {
-        if (dxT > 0 && dx !== -grid) {dx = grid; dy = 0;}
-        else if (dxT < 0 && dx !== grid) {dx = -grid; dy = 0;}
-    } else {
-        if (dyT > 0 && dy !== -grid) {dx = 0; dy = grid;}
-        else if (dyT < 0 && dy !== grid) {dx = 0; dy = -grid;}
-    }
+  const dxTouch = e.touches[0].clientX - startX;
+  const dyTouch = e.touches[0].clientY - startY;
+  if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
+    if (dxTouch > 0 && dx !== -grid) {dx = grid; dy = 0;}
+    else if (dxTouch < 0 && dx !== grid) {dx = -grid; dy = 0;}
+  } else {
+    if (dyTouch > 0 && dy !== -grid) {dx = 0; dy = grid;}
+    else if (dyTouch < 0 && dy !== grid) {dx = 0; dy = -grid;}
+  }
 });
 
-// ✅ Keyboard controls
+// Keyboard
 document.addEventListener("keydown", e => {
-    if (e.key === "ArrowUp" && dy === 0) {dx = 0; dy = -grid;}
-    if (e.key === "ArrowDown" && dy === 0) {dx = 0; dy = grid;}
-    if (e.key === "ArrowLeft" && dx === 0) {dx = -grid; dy = 0;}
-    if (e.key === "ArrowRight" && dx === 0) {dx = grid; dy = 0;}
+  if (e.key === "ArrowUp" && dy === 0) {dx = 0; dy = -grid;}
+  if (e.key === "ArrowDown" && dy === 0) {dx = 0; dy = grid;}
+  if (e.key === "ArrowLeft" && dx === 0) {dx = -grid; dy = 0;}
+  if (e.key === "ArrowRight" && dx === 0) {dx = grid; dy = 0;}
 });
 
 function randomFood() {
-    return {
-        x: Math.floor(Math.random() * 20) * grid,
-        y: Math.floor(Math.random() * 20) * grid
-    };
+  return {
+    x: Math.floor(Math.random() * 20) * grid,
+    y: Math.floor(Math.random() * 20) * grid
+  };
 }
 
 function drawSnake() {
-    ctx.fillStyle = "#4F8BFF";
-    snake.forEach(p => ctx.fillRect(p.x, p.y, grid, grid));
+  snake.forEach((part, index) => {
+    // Head ✅
+    if (index === 0) {
+      ctx.fillStyle = "#4F8BFF"; // Blue head
+      ctx.fillRect(part.x, part.y, grid, grid);
+
+      // Eyes ✅
+      ctx.fillStyle = "white";
+      ctx.fillRect(part.x + 4, part.y + 4, 3, 3);
+      ctx.fillRect(part.x + 13, part.y + 4, 3, 3);
+    } else {
+      // Body stripes ✅
+      ctx.fillStyle = index % 2 === 0 ? "#4F8BFF" : "#FFFFFF";
+      ctx.fillRect(part.x, part.y, grid, grid);
+    }
+  });
 }
 
 function drawFood() {
-    ctx.drawImage(coinImg, food.x, food.y, grid, grid);
+  ctx.drawImage(coinImg, food.x, food.y, grid, grid);
 }
 
 function update() {
-    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+  const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
-        snake.some(p => p.x === head.x && p.y === head.y)) {
+  if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
+      snake.some(p => p.x === head.x && p.y === head.y)) {
+    alert("Game Over!");
+    if (score > best) localStorage.setItem("baseSnakeScore", score);
+    location.reload();
+  }
 
-        alert("Game Over!");
-        if (score > best) localStorage.setItem("baseSnakeScore", score);
-        location.reload();
+  snake.unshift(head);
+
+  if (head.x === food.x && head.y === food.y) {
+    score++;
+    document.getElementById("score").textContent = score;
+    food = randomFood();
+    if (score % 5 === 0) {
+      speed = Math.max(50, speed - 10);
+      clearInterval(gameLoop);
+      gameLoop = setInterval(update, speed);
     }
+  } else {
+    snake.pop();
+  }
 
-    snake.unshift(head);
-
-    if (head.x === food.x && head.y === food.y) {
-        score++;
-        document.getElementById("score").textContent = score;
-        food = randomFood();
-
-        if (score % 5 === 0) {
-            speed = Math.max(50, speed - 10);
-            clearInterval(gameLoop);
-            gameLoop = setInterval(update, speed);
-        }
-    } else {
-        snake.pop();
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawFood();
-    drawSnake();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawFood();
+  drawSnake();
 }
 
 gameLoop = setInterval(update, speed);
