@@ -42,33 +42,33 @@ let score = 0;
 let speed = 150;
 let gameLoop = null;
 
-// Load Base coin image ✅
+// ✅ Load Base coin image (correct filename)
 const coinImg = new Image();
-coinImg.src = "./Basecoin.png"; // correct path
+coinImg.src = "basecoin.png";
 
-// Save best score ✅
+// ✅ Best score
 let best = localStorage.getItem("baseSnakeScore") || 0;
 document.getElementById("best").textContent = best;
 
-// Swipe controls ✅
-let touchStartX = 0, touchStartY = 0;
+// ✅ Mobile swipe controls
+let startX = 0, startY = 0;
 document.addEventListener("touchstart", e => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
 });
 document.addEventListener("touchmove", e => {
-    let dxTouch = e.touches[0].clientX - touchStartX;
-    let dyTouch = e.touches[0].clientY - touchStartY;
-    if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
-        if (dxTouch > 0 && dx !== -grid) {dx = grid; dy = 0;}
-        else if (dxTouch < 0 && dx !== grid) {dx = -grid; dy = 0;}
+    let dxT = e.touches[0].clientX - startX;
+    let dyT = e.touches[0].clientY - startY;
+    if (Math.abs(dxT) > Math.abs(dyT)) {
+        if (dxT > 0 && dx !== -grid) {dx = grid; dy = 0;}
+        else if (dxT < 0 && dx !== grid) {dx = -grid; dy = 0;}
     } else {
-        if (dyTouch > 0 && dy !== -grid) {dx = 0; dy = grid;}
-        else if (dyTouch < 0 && dy !== grid) {dx = 0; dy = -grid;}
+        if (dyT > 0 && dy !== -grid) {dx = 0; dy = grid;}
+        else if (dyT < 0 && dy !== grid) {dx = 0; dy = -grid;}
     }
 });
 
-// Keyboard controls ✅
+// ✅ Keyboard controls
 document.addEventListener("keydown", e => {
     if (e.key === "ArrowUp" && dy === 0) {dx = 0; dy = -grid;}
     if (e.key === "ArrowDown" && dy === 0) {dx = 0; dy = grid;}
@@ -84,10 +84,8 @@ function randomFood() {
 }
 
 function drawSnake() {
-    ctx.fillStyle = "#4F8BFF"; // Blue snake
-    snake.forEach(part => {
-        ctx.fillRect(part.x, part.y, grid, grid);
-    });
+    ctx.fillStyle = "#4F8BFF";
+    snake.forEach(p => ctx.fillRect(p.x, p.y, grid, grid));
 }
 
 function drawFood() {
@@ -97,28 +95,21 @@ function drawFood() {
 function update() {
     const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-    // Crash / Game Over
-    if (
-        head.x < 0 || head.x >= canvas.width ||
-        head.y < 0 || head.y >= canvas.height ||
-        snake.some(p => p.x === head.x && p.y === head.y)
-    ) {
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
+        snake.some(p => p.x === head.x && p.y === head.y)) {
+
         alert("Game Over!");
-        if (score > best) {
-            localStorage.setItem("baseSnakeScore", score);
-        }
+        if (score > best) localStorage.setItem("baseSnakeScore", score);
         location.reload();
     }
 
     snake.unshift(head);
 
-    // Eat coin ✅
     if (head.x === food.x && head.y === food.y) {
         score++;
         document.getElementById("score").textContent = score;
         food = randomFood();
 
-        // Speed up game
         if (score % 5 === 0) {
             speed = Math.max(50, speed - 10);
             clearInterval(gameLoop);
@@ -133,7 +124,6 @@ function update() {
     drawSnake();
 }
 
-// Start game ✅
 gameLoop = setInterval(update, speed);
 </script>
 
