@@ -1,101 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Base Snake 🐍</title>
+<title>Base Snake 🐍💙</title>
 <style>
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #000;
-    margin: 0;
-    font-family: Arial;
-    color: white;
-    flex-direction: column;
-  }
-  canvas {
-    background: #111;
-    border: 2px solid #4A80FF; /* Base blue border */
-  }
-  #score {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
+    body {
+        background: #00163A;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: white;
+        font-family: Arial;
+        text-align: center;
+    }
+
+    canvas {
+        background: #002B6A;
+        border: 3px solid #4F8BFF;
+    }
 </style>
 </head>
 <body>
 
-<div id="score">Score: 0</div>
-<canvas id="game" width="400" height="400"></canvas>
+<div>
+    <h2>🐍 Base Snake 💙</h2>
+    <p>Score: <span id="score">0</span> | Best: <span id="best">0</span></p>
+    <canvas id="game" width="400" height="400"></canvas>
+</div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+const grid = 20;
 
-let grid = 20;
-let snake = [{ x: 160, y: 160 }];
+let snake = [{x: 160, y: 200}];
 let dx = grid;
 let dy = 0;
 let food = randomFood();
 let score = 0;
+let speed = 150;
+let gameLoop = null;
 
-function randomFood() {
-  return {
-    x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
-    y: Math.floor(Math.random() * (canvas.height / grid)) * grid
-  };
-}
+// Load Base coin image ✅
+const coinImg = new Image();
+coinImg.src = "basecoin.png"; // ✅ fixed filename
 
-function gameLoop() {
-  requestAnimationFrame(gameLoop);
+// Save best score locally
+let best = localStorage.getItem("baseSnakeScore") || 0;
+document.getElementById("best").textContent = best;
 
-  if (++count < 6) return;
-  count = 0;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  let head = { x: snake[0].x + dx, y: snake[0].y + dy };
-
-  if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snakeCollision(head)) {
-    alert("Game Over! Score: " + score);
-    document.location.reload();
-  }
-
-  snake.unshift(head);
-
-  if (head.x === food.x && head.y === food.y) {
-    score++;
-    document.getElementById("score").textContent = "Score: " + score;
-    food = randomFood();
-  } else {
-    snake.pop();
-  }
-
-  ctx.fillStyle = "#4A80FF"; // Blue snake
-  snake.forEach(part => ctx.fillRect(part.x, part.y, grid-2, grid-2));
-
-  ctx.fillStyle = "#2962FF"; // Base blue coin
-  ctx.beginPath();
-  ctx.arc(food.x + 10, food.y + 10, 8, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function snakeCollision(head) {
-  return snake.some(seg => seg.x === head.x && seg.y === head.y);
-}
-
-let count = 0;
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -grid; }
-  if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = grid; }
-  if (e.key === "ArrowLeft" && dx === 0) { dx = -grid; dy = 0; }
-  if (e.key === "ArrowRight" && dx === 0) { dx = grid; dy = 0; }
+// Swipe controls
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener("touchstart", e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+});
+document.addEventListener("touchmove", e => {
+    let dxTouch = e.touches[0].clientX - touchStartX;
+    let dyTouch = e.touches[0].clientY - touchStartY;
+    if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
+        if (dxTouch > 0 && dx !== -grid) {dx = grid; dy = 0;}
+        else if (dxTouch < 0 && dx !== grid) {dx = -grid; dy = 0;}
+    } else {
+        if (dyTouch > 0 && dy !== -grid) {dx = 0; dy = grid;}
+        else if (dyTouch < 0 && dy !== grid) {dx = 0; dy = -grid;}
+    }
 });
 
-requestAnimationFrame(gameLoop);
+// Keyboard
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp" && dy === 0) {dx = 0; dy = -grid;}
+    if (e.key === "ArrowDown" && dy === 0) {dx = 0; dy = grid;}
+    if (e.key === "ArrowLeft" && dx === 0) {dx = -grid; dy = 0;}
+    if (e.key === "ArrowRight" && dx === 0) {dx = grid; dy = 0;}
+});
+
+function randomFood() {
+    return {
+        x: Math.floor(Math.random() * 20) * grid,
+        y: Math.floor(Math.random() * 20) * grid
+    };
+}
+
+function drawSnake() {
+    ctx.fillStyle = "#4F8BFF"; // blue snake
+    snake.forEach(part => {
+        ctx.fillRect(part.x, part.y, grid, grid);
+    });
+}
+
+function drawFood() {
+    ctx.drawImage(coinImg, food.x, food.y, grid, grid);
+}
+
+function update() {
+    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
+        snake.some(p => p.x === head.x && p.y === head.y)) {
+        alert("Game Over!");
+        if (score > best) {
+            localStorage.setItem("baseSnakeScore", score);
+        }
+        location.reload();
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+        score++;
+        document.getElementById("score").textContent = score;
+        food = randomFood();
+
+        if (score % 5 === 0) {
+            speed = Math.max(50, speed - 10);
+            clearInterval(gameLoop);
+            gameLoop = setInterval(update, speed);
+        }
+    } else {
+        snake.pop();
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawFood();
+    drawSnake();
+}
+
+gameLoop = setInterval(update, speed);
 </script>
 
 </body>
