@@ -1,195 +1,131 @@
-// Screen references
-const splashScreen = document.getElementById("splashScreen");
-const loadingScreen = document.getElementById("loadingScreen");
-const menuScreen = document.getElementById("menuScreen");
-const gameScreen = document.getElementById("gameScreen");
-
-// Game Canvas
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = 350;
-canvas.height = 350;
-
-// Buttons
-const startBtn = document.getElementById("startBtn");
-const tutorialBtn = document.getElementById("tutorialBtn");
-const scoreBtn = document.getElementById("scoreBtn");
-const walletBtn = document.getElementById("walletBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const retryBtn = document.getElementById("retryBtn");
-const muteBtn = document.getElementById("muteBtn");
-
-// Sounds
-let eatSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-let gameOverSound = new Audio("https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg");
-let muted = false;
-
-// Snake settings
-let snake;
-let dir;
-let food;
-let speed = 120;
-let gameInterval;
-let gamePaused = false;
-let eyesBlink = false;
-
-// Load food (Basecoin)
-const foodImg = new Image();
-foodImg.src = "basecoin.png";
-
-// Splash → Loading → Menu
+/* ------------------ Splash -> Loading -> Menu ------------------ */
 setTimeout(() => {
-    splashScreen.style.display = "none";
-    loadingScreen.style.display = "block";
-    
-    setTimeout(() => {
-        loadingScreen.style.display = "none";
-        menuScreen.style.display = "block";
-    }, 2000);
-}, 2000);
+    splash.style.display="none";
+    loading.style.display="block";
 
-// Game start
-startBtn.onclick = () => {
-    menuScreen.style.display = "none";
-    gameScreen.style.display = "block";
-    startGame();
-};
+    const frames=["Oooo","OOoo","OOOo","OOOO"]; 
+    let i=0;
+    let anim=setInterval(()=>{
+        loadSnake.textContent = frames[i];
+        i=(i+1)%frames.length;
+    },400);
 
-// Pause / Retry
-pauseBtn.onclick = () => {
-    gamePaused = !gamePaused;
-    pauseBtn.innerText = gamePaused ? "Resume" : "Pause";
-};
+    setTimeout(()=>{
+        clearInterval(anim);
+        loading.style.display="none";
+        menu.style.display="block";
+    },3000);
 
-retryBtn.onclick = () => {
-    clearInterval(gameInterval);
-    startGame();
-};
+},1500);
 
-// Mute button
-muteBtn.onclick = () => {
-    muted = !muted;
-    muteBtn.textContent = muted ? "🔇" : "🔊";
-};
+/* ------------------ Buttons ------------------ */
+startBtn.onclick = () => { menu.style.display="none"; gameContainer.style.display="block"; startGame(); }
+tutorialBtn.onclick = () => alert("Controls:\nW A S D or Arrows\nSwipe on Mobile\nEat BaseCoins ✅");
+bestBtn.onclick = () => alert("On-chain leaderboard coming 🔥");
+walletBtn.onclick = () => alert("Wallet connect coming soon 💙");
 
-// Initialize game
-function startGame() {
-    snake = [{ x:160, y:160 }];
-    dir = { x:10, y:0 };
-    newFood();
-    gamePaused = false;
-    pauseBtn.innerText = "Pause";
+pauseBtn.onclick = ()=> togglePause();
+retryBtn.onclick = ()=> location.reload();
+muteBtn.onclick = ()=> toggleMute();
 
-    clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, speed);
+/* ------------------ Game ------------------ */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const grid = 20;
+
+let snake,dx,dy,food,score,speed,loop,paused=false,soundOn=false;
+
+const bite = new Audio(); // future sound fx
+bite.src = ""; // placeholder
+
+const coin = new Image();
+coin.src = "basecoin.png";
+
+function startGame(){
+    snake=[{x:160,y:200}];
+    dx=grid; dy=0;
+    food=randFood();
+    score=0; speed=150;
+    loop=setInterval(update,speed);
 }
 
-// Move snake
-function moveSnake() {
-    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-    snake.unshift(head);
-
-    // Eat food
-    if (head.x === food.x && head.y === food.y) {
-        if(!muted) eatSound.play();
-        newFood();
-    } else {
-        snake.pop();
-    }
+function randFood(){
+    return {x:Math.floor(Math.random()*20)*grid, y:Math.floor(Math.random()*20)*grid};
 }
 
-// Display snake
-function drawSnake() {
-    snake.forEach((s, i) => {
-        ctx.fillStyle = "#00ff0a";
-        ctx.fillRect(s.x, s.y, 10, 10);
+function drawSnake(){
+    snake.forEach((p,i)=>{
+        if(i===0){
+            ctx.fillStyle="#4F8BFF";
+            ctx.fillRect(p.x,p.y,grid,grid);
 
-        // Eyes on head
-        if(i === 0){
-            ctx.fillStyle = eyesBlink ? "black" : "white";
-            ctx.fillRect(s.x + 2, s.y + 2, 2, 2);
-            ctx.fillRect(s.x + 6, s.y + 2, 2, 2);
+            // blinking eyes
+            if(Date.now()%700<400){
+                ctx.fillStyle="white";
+                ctx.fillRect(p.x+4,p.y+4,3,3);
+                ctx.fillRect(p.x+13,p.y+4,3,3);
+            }
+        } else {
+            ctx.fillStyle="#2f5dcc";
+            ctx.fillRect(p.x,p.y,grid,grid);
         }
     });
 }
 
-setInterval(() => eyesBlink = !eyesBlink, 350);
+function drawFood(){ ctx.drawImage(coin,food.x,food.y,grid,grid); }
 
-// Walls
-function drawWalls() {
-    ctx.strokeStyle = "#00f2ff";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(0,0,canvas.width,canvas.height);
-}
+function update(){
+    if(paused) return;
 
-// Food
-function newFood() {
-    food = {
-        x: Math.floor(Math.random() * 35) * 10,
-        y: Math.floor(Math.random() * 35) * 10
-    };
-}
+    const head={x:snake[0].x+dx, y:snake[0].y+dy};
 
-function drawFood() {
-    ctx.drawImage(foodImg, food.x, food.y, 10, 10);
-}
-
-// Game over
-function gameOver() {
-    if(!muted) gameOverSound.play();
-    clearInterval(gameInterval);
-    if(confirm("Game Over! Quit?")) {
-        gameScreen.style.display = "none";
-        menuScreen.style.display = "block";
-    } else {
-        startGame();
-    }
-}
-
-// Game loop
-function gameLoop() {
-    if(gamePaused) return;
-
-    moveSnake();
-
-    const head = snake[0];
-    if(head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) return gameOver();
-    for(let i=1; i<snake.length; i++){
-        if(head.x===snake[i].x && head.y===snake[i].y) return gameOver();
+    if(head.x<0||head.x>=400||head.y<0||head.y>=400|| snake.some(p=>p.x===head.x&&p.y===head.y)){
+        alert("Game ended. Exit?");
+        location.reload();
+        return;
     }
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    drawWalls();
+    snake.unshift(head);
+
+    if(head.x===food.x && head.y===food.y){
+        score++;
+        food=randFood();
+        if(soundOn) bite.play();
+    } else snake.pop();
+
+    ctx.clearRect(0,0,400,400);
     drawFood();
     drawSnake();
 }
 
-// Keyboard controls WASD + Arrows
-document.addEventListener("keydown", e => {
-    if(e.key === "w" || e.key === "ArrowUp") dir = { x:0, y:-10 };
-    if(e.key === "s" || e.key === "ArrowDown") dir = { x:0, y:10 };
-    if(e.key === "a" || e.key === "ArrowLeft") dir = { x:-10, y:0 };
-    if(e.key === "d" || e.key === "ArrowRight") dir = { x:10, y:0 };
+/* ------------------ Controls ------------------ */
+document.addEventListener("keydown", e=>{
+    const k=e.key;
+    if(k==="w"||k==="ArrowUp")   {dx=0; dy=-grid;}
+    if(k==="s"||k==="ArrowDown") {dx=0; dy=grid;}
+    if(k==="a"||k==="ArrowLeft") {dx=-grid; dy=0;}
+    if(k==="d"||k==="ArrowRight"){dx=grid; dy=0;}
 });
 
-// Swipe controls mobile
-let startX = null;
-let startY = null;
-
-document.addEventListener("touchstart", e => {
-    startX = e.changedTouches[0].clientX;
-    startY = e.changedTouches[0].clientY;
-});
-
-document.addEventListener("touchend", e => {
-    let dx = e.changedTouches[0].clientX - startX;
-    let dy = e.changedTouches[0].clientY - startY;
-
-    if(Math.abs(dx) > Math.abs(dy)) {
-        if(dx > 0) dir = {x:10, y:0};
-        else dir = {x:-10, y:0};
+/* Mobile Swipe */
+let sx=0, sy=0;
+document.addEventListener("touchstart",e=>{sx=e.touches[0].clientX; sy=e.touches[0].clientY;});
+document.addEventListener("touchmove",e=>{
+    let dxT=e.touches[0].clientX-sx;
+    let dyT=e.touches[0].clientY-sy;
+    if(Math.abs(dxT)>Math.abs(dyT)){
+        if(dxT>0) {dx=grid;dy=0;} else {dx=-grid;dy=0;}
     } else {
-        if(dy > 0) dir = {x:0, y:10};
-        else dir = {x:0, y:-10};
+        if(dyT>0) {dx=0;dy=grid;} else {dx=0;dy=-grid;}
     }
 });
+
+/* Pause / Sound */
+function togglePause(){
+    paused=!paused;
+    pauseBtn.textContent = paused ? "▶️ Resume" : "⏸ Pause";
+}
+function toggleMute(){
+    soundOn=!soundOn;
+    muteBtn.textContent = soundOn ? "🔊" : "🔈";
+}
