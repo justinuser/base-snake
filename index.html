@@ -1,45 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>BaseSnake 🐍</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BaseSnake</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- Splash -->
-<div id="splash" class="screen">
-    <div class="logo-text">BASESNAKE</div>
-</div>
+<!-- Menu Screen -->
+<div id="menu">
+    <button id="startBtn">Start Game</button>
+    <button id="tutorialBtn">Tutorial</button>
+    <button id="bestScoreBtn">Best Score</button>
 
-<!-- Loading -->
-<div id="loading" class="screen" style="display:none;">
-    <div class="loading-snake"><span id="loadSnake">Oooo</span></div>
-    <p class="loading-text">Loading...</p>
-</div>
-
-<!-- Menu -->
-<div id="menu" class="screen" style="display:none;">
+    <!-- ✅ CONNECT WALLET prettier -->
     <button id="walletBtn" class="wallet-btn">Connect Wallet</button>
-
-    <h1 class="title">🐍 Base Snake 💙</h1>
-
-    <button class="btn" id="startBtn">Start Game</button>
-    <button class="btn" id="tutorialBtn">Tutorial</button>
-    <button class="btn" id="bestBtn">Best Score</button>
 </div>
 
 <!-- Game Canvas -->
-<div id="gameContainer" style="display:none; text-align:center;">
-    <canvas id="game" width="400" height="400"></canvas>
+<canvas id="gameCanvas"></canvas>
 
-    <div class="controls">
-        <button id="pauseBtn" class="smallBtn">⏸ Pause</button>
-        <button id="retryBtn" class="smallBtn">🔁 Retry</button>
-        <button id="muteBtn" class="smallBtn">🔊</button>
-    </div>
+<!-- Buttons in-game -->
+<div id="ui">
+    <button id="pauseBtn">Pause</button>
+    <button id="retryBtn">Retry</button>
+    <button id="muteBtn">Mute</button>
 </div>
 
-<script src="game.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
