@@ -1,45 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BaseSnake</title>
+<title>BaseSnake 🐍</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<!-- Splash Intro -->
-<div id="splashScreen">
-    <h1 class="block-title">BASESNAKE</h1>
+<!-- Splash -->
+<div id="splash" class="screen">
+    <div class="logo-text">BASESNAKE</div>
 </div>
 
-<!-- Loading Screen -->
-<div id="loadingScreen">
-    <canvas id="loadingCanvas"></canvas>
-    <p>Loading Snake...</p>
+<!-- Loading -->
+<div id="loading" class="screen" style="display:none;">
+    <div class="loading-snake"><span id="loadSnake">Oooo</span></div>
+    <p class="loading-text">Loading...</p>
 </div>
 
-<!-- Main Menu -->
-<div id="menuScreen" class="hidden">
-    <img src="basecoin.png" class="logo">
-    <button id="startBtn">PLAY</button>
-    <button id="tutorialBtn">TUTORIAL</button>
-    <button id="scoreBtn">BEST SCORE</button>
+<!-- Menu -->
+<div id="menu" class="screen" style="display:none;">
+    <button id="walletBtn" class="wallet-btn">Connect Wallet</button>
 
-    <button id="walletBtn" class="wallet">Connect Wallet</button>
+    <h1 class="title">🐍 Base Snake 💙</h1>
+
+    <button class="btn" id="startBtn">Start Game</button>
+    <button class="btn" id="tutorialBtn">Tutorial</button>
+    <button class="btn" id="bestBtn">Best Score</button>
 </div>
 
-<!-- Game -->
-<div id="gameScreen" class="hidden">
-    <canvas id="gameCanvas"></canvas>
+<!-- Game Canvas -->
+<div id="gameContainer" style="display:none; text-align:center;">
+    <canvas id="game" width="400" height="400"></canvas>
 
-    <div class="game-controls">
-        <button id="pauseBtn">Pause</button>
-        <button id="retryBtn">Retry</button>
-        <button id="muteBtn">🔊</button>
+    <div class="controls">
+        <button id="pauseBtn" class="smallBtn">⏸ Pause</button>
+        <button id="retryBtn" class="smallBtn">🔁 Retry</button>
+        <button id="muteBtn" class="smallBtn">🔊</button>
     </div>
 </div>
 
-<script src="script.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
