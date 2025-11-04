@@ -1,54 +1,83 @@
-body {
-  margin: 0;
-  background: #000;
-  font-family: monospace;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 400;
+canvas.height = 400;
+
+let snake = [{x:200,y:200}];
+let food = randomFood();
+let direction = "RIGHT";
+let game;
+let mute = false;
+
+document.getElementById("startBtn").onclick = startGame;
+document.getElementById("retryBtn").onclick = startGame;
+document.getElementById("pauseBtn").onclick = () => clearInterval(game);
+document.getElementById("muteBtn").onclick = () => mute = !mute;
+
+document.addEventListener("keydown", e => {
+  if(e.key==="w") direction="UP";
+  if(e.key==="a") direction="LEFT";
+  if(e.key==="s") direction="DOWN";
+  if(e.key==="d") direction="RIGHT";
+});
+
+function startGame(){
+  document.getElementById("menu").style.display="none";
+  document.getElementById("gameCanvas").style.display="block";
+  document.getElementById("ui").style.display="block";
+
+  snake = [{x:200,y:200}];
+  direction="RIGHT";
+  food = randomFood();
+
+  game = setInterval(update,150);
 }
 
-/* Menu */
-#menu {
-  text-align: center;
+function randomFood(){
+  return {
+    x: Math.floor(Math.random()*20)*20,
+    y: Math.floor(Math.random()*20)*20
+  };
 }
 
-button {
-  background:#444;
-  border:none;
-  color:white;
-  padding:12px 20px;
-  font-size:18px;
-  margin:10px;
-  cursor:pointer;
-  border-radius:10px;
+function update(){
+  let head = {...snake[0]};
+  if(direction==="UP") head.y -=20;
+  if(direction==="DOWN") head.y +=20;
+  if(direction==="LEFT") head.x -=20;
+  if(direction==="RIGHT") head.x +=20;
+
+  // ✅ Hit wall = end (wall visible now)
+  if(head.x<0||head.x>=400||head.y<0||head.y>=400){
+    clearInterval(game);
+    alert("Game Over");
+    return;
+  }
+
+  snake.unshift(head);
+
+  if(head.x===food.x && head.y===food.y){
+    food = randomFood();
+  } else {
+    snake.pop();
+  }
+
+  draw();
 }
 
-/* ✅ Attractive Wallet Button */
-.wallet-btn {
-  background: linear-gradient(135deg,#0057ff,#00b8ff);
-  font-weight:bold;
-  border:2px solid #00eaff;
-  box-shadow:0px 0px 10px #00eaff;
-}
+function draw(){
+  ctx.fillStyle="black";
+  ctx.fillRect(0,0,400,400);
 
-/* Game */
-#gameCanvas {
-  background: #111;
-  border: 4px solid #00b8ff; /* ✅ WALL visible */
-  display:none;
-}
+  // Draw Snake
+  ctx.fillStyle="#0f0";
+  snake.forEach((s,i)=>{
+    ctx.fillRect(s.x,s.y,20,20);
+  });
 
-/* In-game buttons */
-#ui {
-  display:none;
-  position: absolute;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-#ui button {
-  background:#222;
+  // Draw BaseCoin food
+  let img = new Image();
+  img.src="basecoin.png";
+  ctx.drawImage(img,food.x,food.y,20,20);
 }
