@@ -1,53 +1,52 @@
 body {
-    margin:0;
-    background:#00163A;
-    color:white;
+    background: #000;
+    color: white;
     font-family: monospace;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    overflow:hidden;
-    text-align:center;
+    text-align: center;
 }
 
-.screen {
-    animation: fadeIn .6s ease;
+/* Block square font effect */
+.block-title {
+    font-size: 32px;
+    letter-spacing: 4px;
+    font-weight: bold;
 }
 
-@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-
-.logo-text {
-    font-size:48px;
-    letter-spacing:6px;
-    font-weight:bold;
-    color:#4F8BFF;
-    text-shadow:0 0 8px #4F8BFF;
+/* Logo */
+.logo {
+    width: 120px;
+    margin-bottom: 20px;
 }
 
-.btn, .smallBtn {
-    background:#4F8BFF;
-    border:none;
-    padding:12px 25px;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:18px;
-    margin:10px;
-}
-.btn:hover, .smallBtn:hover { background:#6fa2ff; }
-
-.wallet-btn {
-    position:absolute;
-    right:15px;
-    top:15px;
-    background:#13346d;
-    border:2px solid #4F8BFF;
-    padding:8px 15px;
-    border-radius:6px;
+/* Wallet button highlight */
+.wallet {
+    background: linear-gradient(90deg, #0052ff, #00cfff);
+    padding: 12px 22px;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    border: none;
+    margin-top: 15px;
 }
 
-.smallBtn {
-    padding:8px 15px;
-    font-size:15px;
+/* Game Walls */
+#gameCanvas {
+    background: black;
+    outline: 4px solid #00f2ff;
+}
+
+/* Hide screen class */
+.hidden { display: none; }
+
+button {
+    margin: 10px;
+    padding: 12px 20px;
+    background: #111;
+    color: white;
+    border: 2px solid #00f2ff;
+    border-radius: 8px;
+}
+
+.game-controls {
+    margin-top: 10px;
 }
