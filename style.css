@@ -1,83 +1,53 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = 400;
-canvas.height = 400;
-
-let snake = [{x:200,y:200}];
-let food = randomFood();
-let direction = "RIGHT";
-let game;
-let mute = false;
-
-document.getElementById("startBtn").onclick = startGame;
-document.getElementById("retryBtn").onclick = startGame;
-document.getElementById("pauseBtn").onclick = () => clearInterval(game);
-document.getElementById("muteBtn").onclick = () => mute = !mute;
-
-document.addEventListener("keydown", e => {
-  if(e.key==="w") direction="UP";
-  if(e.key==="a") direction="LEFT";
-  if(e.key==="s") direction="DOWN";
-  if(e.key==="d") direction="RIGHT";
-});
-
-function startGame(){
-  document.getElementById("menu").style.display="none";
-  document.getElementById("gameCanvas").style.display="block";
-  document.getElementById("ui").style.display="block";
-
-  snake = [{x:200,y:200}];
-  direction="RIGHT";
-  food = randomFood();
-
-  game = setInterval(update,150);
+body {
+    margin:0;
+    background:#00163A;
+    color:white;
+    font-family: monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+    text-align:center;
 }
 
-function randomFood(){
-  return {
-    x: Math.floor(Math.random()*20)*20,
-    y: Math.floor(Math.random()*20)*20
-  };
+.screen {
+    animation: fadeIn .6s ease;
 }
 
-function update(){
-  let head = {...snake[0]};
-  if(direction==="UP") head.y -=20;
-  if(direction==="DOWN") head.y +=20;
-  if(direction==="LEFT") head.x -=20;
-  if(direction==="RIGHT") head.x +=20;
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
-  // ✅ Hit wall = end (wall visible now)
-  if(head.x<0||head.x>=400||head.y<0||head.y>=400){
-    clearInterval(game);
-    alert("Game Over");
-    return;
-  }
-
-  snake.unshift(head);
-
-  if(head.x===food.x && head.y===food.y){
-    food = randomFood();
-  } else {
-    snake.pop();
-  }
-
-  draw();
+.logo-text {
+    font-size:48px;
+    letter-spacing:6px;
+    font-weight:bold;
+    color:#4F8BFF;
+    text-shadow:0 0 8px #4F8BFF;
 }
 
-function draw(){
-  ctx.fillStyle="black";
-  ctx.fillRect(0,0,400,400);
+.btn, .smallBtn {
+    background:#4F8BFF;
+    border:none;
+    padding:12px 25px;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:18px;
+    margin:10px;
+}
+.btn:hover, .smallBtn:hover { background:#6fa2ff; }
 
-  // Draw Snake
-  ctx.fillStyle="#0f0";
-  snake.forEach((s,i)=>{
-    ctx.fillRect(s.x,s.y,20,20);
-  });
+.wallet-btn {
+    position:absolute;
+    right:15px;
+    top:15px;
+    background:#13346d;
+    border:2px solid #4F8BFF;
+    padding:8px 15px;
+    border-radius:6px;
+}
 
-  // Draw BaseCoin food
-  let img = new Image();
-  img.src="basecoin.png";
-  ctx.drawImage(img,food.x,food.y,20,20);
+.smallBtn {
+    padding:8px 15px;
+    font-size:15px;
 }
